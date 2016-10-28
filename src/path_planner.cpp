@@ -11,11 +11,11 @@ int main(int argc, char** argv) {
 
     ros::Duration(0.5).sleep();
 
-    float Va = 30;//11;
+    float Va = 11;//11;
     float wps[5*num_waypoints] = {
-				500, 0, -150, 0, Va,
-				0, -500, -150, 0, Va,
-				500, -500, -200, 0, Va,
+				300, 0, -150, 0, Va,
+				0, -300, -150, 0, Va,
+				300, -300, -200, 0, Va,
 				0, 0, -50, 0, Va,
                };
 
