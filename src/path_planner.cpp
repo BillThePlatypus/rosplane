@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         new_waypoint.w[2] = wps[i*5 + 2];
         new_waypoint.chi_d = wps[i*5 + 3];
 
-        new_waypoint.chi_valid = false;//true;
+        new_waypoint.chi_valid = true;//true;+++++++++++++++++++++++++++++++++
         new_waypoint.Va_d = wps[i*5 + 4];
 
         waypointPublisher.publish(new_waypoint);

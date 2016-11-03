@@ -1,5 +1,6 @@
 #include "path_manager_example.h"
-//#include <iostream>
+//#include <iostream>//-------------------------------FOR DEBUG-----------------
+//#include <ros/console.h>//----------------------------------------------------
 #include<cmath>
 
 namespace rosplane {
@@ -12,9 +13,10 @@ path_manager_example::path_manager_example() : path_manager_base()
 
 void path_manager_example::manage(const params_s &params, const input_s &input, output_s &output)
 {
-
+// input is state information, output is position information
     if(_num_waypoints < 2)
     {
+      num_times_lt2++;//----------------------------------------
         output.flag = true;
         output.Va_d = 9;
         output.r[0] = input.pn;
@@ -36,7 +38,7 @@ void path_manager_example::manage(const params_s &params, const input_s &input, 
         } else {
             /** Switch the following for flying directly to waypoints, or filleting corners */
 //            manage_line(params, input, output);
-            manage_fillet(params, input, output);
+            manage_fillet(params, input, output); // <<<<<<<<<<<<<<
         }
     }
 }
