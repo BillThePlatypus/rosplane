@@ -4,7 +4,7 @@ import rospy
 #from std_msgs.msg import String
 from fcu_common.msg import FW_State
 from rosgraph_msgs.msg import Clock
-
+from fcu_common.msg import FW_Current_Path
 #stuff we need for plotting
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,9 +32,12 @@ class state_subscriber():
 		self.wn = 0.
 		self.we = 0.
 		self.time = 0.
+		self.waypoint_pn = 0. # hold the published way points
+		self.waypoint_pe = 0.
 		#------------------------------------------------------------
 		rospy.Subscriber("/junker/truth", FW_State, self.callback)
 		rospy.Subscriber("/clock", Clock, self.callback_time)
+		rospy.Subscriber("/current_path", FW_Current_Path,self.callback_waypoints)
 		self.rate = 100 # 100 hz
 
 	def callback(self, FW_State):
@@ -57,6 +60,10 @@ class state_subscriber():
 
 	def callback_time(self, Clock):
 		self.time = Clock.clock.to_sec()
+
+	def callback_waypoints(self,FW_Current_Path):
+		self.waypoint_pn = FW_Current_Path.r[0] #NED Coordinates
+		self.waypoint_pe = FW_Current_Path.r[1]
 
 	def print_states(self):
 		print "pn: ", self.pn
@@ -86,18 +93,22 @@ states = state_subscriber()
 #------------------------------------------------------------
 # set up figure and animation for plotting of states
 fig_plots1 = plt.figure()
-#fig_plots2 = plt.figure()
+fig_plots2 = plt.figure()
 
-ax_pn	= fig_plots1.add_subplot(811, xlim=(0, 4), ylim=(-7, 7))
-ax_pe	= fig_plots1.add_subplot(812, sharex=ax_pn, ylim=(-7, 7))
-ax_pd	= fig_plots1.add_subplot(813, sharex=ax_pn, ylim=(-7, 7))
-ax_Va	= fig_plots1.add_subplot(814, sharex=ax_pn, ylim=(-7, 7))
+
+
+ax_pn	= fig_plots1.add_subplot(421, xlim=(0, 4), ylim=(-7, 7))
+ax_pe	= fig_plots1.add_subplot(422, sharex=ax_pn, ylim=(-7, 7))
+ax_pd	= fig_plots1.add_subplot(423, sharex=ax_pn, ylim=(-7, 7))
+ax_Va	= fig_plots1.add_subplot(424, sharex=ax_pn, ylim=(-7, 7))
 #ax_alpha = fig_plots1.add_subplot(815, sharex=ax_pn, ylim=(-7, 7))
-ax_phi = fig_plots1.add_subplot(815, sharex=ax_pn, ylim=(-7, 7))
+ax_phi = fig_plots1.add_subplot(425, sharex=ax_pn, ylim=(-7, 7))
 #ax_beta  = fig_plots1.add_subplot(816, sharex=ax_pn, ylim=(-7, 7))
-ax_theta  = fig_plots1.add_subplot(816, sharex=ax_pn, ylim=(-7, 7))
+ax_theta  = fig_plots1.add_subplot(426, sharex=ax_pn, ylim=(-7, 7))
 #ax_phi   = fig_plots1.add_subplot(817, sharex=ax_pn, ylim=(-7, 7))
-ax_psi   = fig_plots1.add_subplot(817, sharex=ax_pn, ylim=(-7, 7))
+ax_psi   = fig_plots1.add_subplot(427, sharex=ax_pn, ylim=(-7, 7))
+top_down = fig_plots2.add_subplot(111, xlim=(-1000,1000), ylim=(-1000,1000))
+#top_down1 = fig_plots2.add_subplot(122, xlim=(-1000,1000), ylim=(-1000,1000))
 #ax_theta = fig_plots1.add_subplot(818, sharex=ax_pn, ylim=(-7, 7))
 #ax_psi   = fig_plots2.add_subplot(811, sharex=ax_pn, ylim=(-7, 7))
 #ax_chi   = fig_plots2.add_subplot(812, sharex=ax_pn, ylim=(-7, 7))
@@ -107,6 +118,7 @@ ax_psi   = fig_plots1.add_subplot(817, sharex=ax_pn, ylim=(-7, 7))
 #ax_Vg	= fig_plots2.add_subplot(816, sharex=ax_pn, ylim=(-7, 7))
 #ax_wn	= fig_plots2.add_subplot(817, sharex=ax_pn, ylim=(-7, 7))
 #ax_we	= fig_plots2.add_subplot(818, sharex=ax_pn, ylim=(-7, 7))
+fig_plots1.subplots_adjust(0.125,0.1,0.9,0.9,0.8,0.8) # left,bottom,right,top,blank space, white space
 
 ax_pn.grid()
 ax_pe.grid()
@@ -117,6 +129,7 @@ ax_Va.grid()
 ax_phi.grid()
 ax_theta.grid()
 ax_psi.grid()
+top_down.grid()
 #ax_chi.grid()
 #ax_p.grid()
 #ax_q.grid()
@@ -134,6 +147,10 @@ line_Va,	= ax_Va.plot([], [])
 line_phi,   = ax_phi.plot([], [])
 line_theta, = ax_theta.plot([], [])
 line_psi,   = ax_psi.plot([], [])
+line_top_down, = top_down.plot([],[])
+line_waypoints, = top_down.plot([],[]) # plot the waypoints
+line_waypoints.set_marker("o")
+line_waypoints.set_markersize(10)
 #line_chi,   = ax_chi.plot([], [])
 #line_p,	 = ax_p.plot([], [])
 #line_q,	 = ax_q.plot([], [])
@@ -151,6 +168,8 @@ ax_Va.set_ylabel('Va')
 ax_phi.set_ylabel(u'\u03A6')
 ax_theta.set_ylabel(u'\u0398')
 ax_psi.set_ylabel(u'\u03C8')
+top_down.set_ylabel('pn')
+top_down.set_xlabel('pe')
 #ax_chi.set_ylabel(u'\u03A7')
 #ax_p.set_ylabel('p')
 #ax_q.set_ylabel('q')
@@ -176,6 +195,8 @@ psi_data	= np.array([])
 #wn_data	 = np.array([])
 #we_data	 = np.array([])
 time_data   = np.array([])
+waypoint_pn_data = np.array([])
+waypoint_pe_data = np.array([])
 
 # the following variables keep track of our axis limits so we can scale them when needed
 pn_max	= 7.0
@@ -223,6 +244,8 @@ def init_plot1():
 	line_phi.set_data([], [])
 	line_theta.set_data([], [])
 	line_psi.set_data([], [])
+	line_top_down.set_data([], [])
+	line_waypoints.set_data([],[])
 	#	line_chi.set_data([], [])
 	#	line_p.set_data([], [])
 	#	line_q.set_data([], [])
@@ -237,15 +260,16 @@ def animate_plot1(i):
 	"""perform animation step"""
 
 	#	global states, pn_data, pe_data, pd_data, Va_data, alpha_data, beta_data, phi_data, theta_data, time_data
-	global states, pn_data, pe_data, pd_data, Va_data, phi_data, theta_data, psi_data, time_data
+	global states, pn_data, pe_data, pd_data, Va_data, phi_data, theta_data, psi_data, time_data, waypoint_pn_data, waypoint_pe_data
 	#	global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, fig_plots1, fig_plots2
-	global ax_pn, ax_pe, ax_pd, ax_Va, ax_phi, ax_theta, ax_psi, fig_plots1
+	global ax_pn, ax_pe, ax_pd, ax_Va, ax_phi, ax_theta, ax_psi, top_down,fig_plots1
 	#	global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min, axis_xlim
 	global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, phi_max, phi_min, theta_max, theta_min, psi_max, psi_min, axis_xlim
 	# the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
 	pn_data	 = np.append(pn_data, states.pn)
 	#print np.size(pn_data)
 	#print pn_data
+	#print "w: ", states.waypoints
 	pe_data	 = np.append(pe_data, states.pe)
 	pd_data	 = np.append(pd_data, states.pd)
 	Va_data	 = np.append(Va_data, states.Va)
@@ -254,6 +278,8 @@ def animate_plot1(i):
 	phi_data	= np.append(phi_data, states.phi)
 	theta_data  = np.append(theta_data, states.theta)
 	psi_data = np.append(psi_data, states.psi)
+	waypoint_pn_data = np.append(waypoint_pn_data, states.waypoint_pn)
+	waypoint_pe_data = np.append(waypoint_pe_data, states.waypoint_pe)
 	time_data   = np.append(time_data, states.time)
 
 	# update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
@@ -366,6 +392,7 @@ def animate_plot1(i):
 	# update the plot if any of the axis limits have changed
 	if need_to_plot:
 		fig_plots1.show()
+		fig_plots2.show()
 
 	line_pn.set_data(time_data,	 pn_data   )
 	line_pe.set_data(time_data,	 pe_data   )
@@ -376,6 +403,8 @@ def animate_plot1(i):
 	line_phi.set_data(time_data,	phi_data  )
 	line_theta.set_data(time_data,  theta_data)
 	line_psi.set_data(time_data,  psi_data)
+	line_top_down.set_data(pe_data, pn_data)
+	line_waypoints.set_data(waypoint_pe_data,waypoint_pn_data)
 	return line_pn, line_pe, line_pd, line_Va, line_phi, line_theta, line_psi
 '''
 def init_plot2():
