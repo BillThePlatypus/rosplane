@@ -232,6 +232,7 @@ wn_min	=-7.0
 we_max	= 7.0
 we_min	=-7.0
 axis_xlim = 0.0
+top_down_axis_lim = 1000
 
 def init_plot1():
 	"""initialize animation"""
@@ -264,7 +265,7 @@ def animate_plot1(i):
 	#	global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, fig_plots1, fig_plots2
 	global ax_pn, ax_pe, ax_pd, ax_Va, ax_phi, ax_theta, ax_psi, top_down,fig_plots1
 	#	global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min, axis_xlim
-	global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, phi_max, phi_min, theta_max, theta_min, psi_max, psi_min, axis_xlim
+	global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, phi_max, phi_min, theta_max, theta_min, psi_max, psi_min, axis_xlim, top_down_axis_lim
 	# the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
 	pn_data	 = np.append(pn_data, states.pn)
 	#print np.size(pn_data)
@@ -334,6 +335,11 @@ def animate_plot1(i):
 		ax_Va.set_ylim(Va_min, Va_max)
 		need_to_plot = True
 
+	if(states.pe > top_down_axis_lim or states.pn> top_down_axis_lim or states.pe < -top_down_axis_lim or states.pn < -top_down_axis_lim):
+		top_down_axis_lim = top_down_axis_lim + 100
+		top_down.set_xlim(-top_down_axis_lim,top_down_axis_lim)
+		top_down.set_ylim(-top_down_axis_lim,top_down_axis_lim)
+		need_to_plot = True
 #	# alpha check
 #	if(alpha_min > alpha_data.min()):
 #		alpha_min = alpha_data.min() - 1.0
