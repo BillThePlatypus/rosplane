@@ -5,6 +5,7 @@ import rospy
 from fcu_common.msg import FW_State
 from rosgraph_msgs.msg import Clock
 from fcu_common.msg import FW_Current_Path
+from fcu_common.msg import FW_Attitude_Commands
 #stuff we need for plotting
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,7 +23,9 @@ class state_subscriber():
 		self.alpha = 0.
 		self.beta = 0.
 		self.phi = 0.
+		self.phi_c = 0.
 		self.theta = 0.
+		self.theta_c = 0.
 		self.psi = 0.
 		self.chi = 0.
 		self.p = 0.
@@ -38,6 +41,7 @@ class state_subscriber():
 		rospy.Subscriber("/junker/truth", FW_State, self.callback)
 		rospy.Subscriber("/clock", Clock, self.callback_time)
 		rospy.Subscriber("/current_path", FW_Current_Path,self.callback_waypoints)
+		rospy.Subscriber("/attitude_commands", FW_Attitude_Commands,self.callback_attitude)
 		self.rate = 100 # 100 hz
 
 	def callback(self, FW_State):
@@ -64,6 +68,10 @@ class state_subscriber():
 	def callback_waypoints(self,FW_Current_Path):
 		self.waypoint_pn = FW_Current_Path.r[0] #NED Coordinates
 		self.waypoint_pe = FW_Current_Path.r[1]
+
+	def callback_attitude(self, FW_Attitde_Commands):
+		self.theta_c = FW_Attitde_Commands.theta_c # commanded values for phi and theta
+		self.phi_c = FW_Attitde_Commands.phi_c
 
 	def print_states(self):
 		print "pn: ", self.pn
@@ -151,6 +159,8 @@ line_top_down, = top_down.plot([],[])
 line_waypoints, = top_down.plot([],[]) # plot the waypoints
 line_waypoints.set_marker("o")
 line_waypoints.set_markersize(10)
+line_phi_c, = ax_phi.plot([], [])
+line_theta_c, = ax_theta.plot([], [])
 #line_chi,   = ax_chi.plot([], [])
 #line_p,	 = ax_p.plot([], [])
 #line_q,	 = ax_q.plot([], [])
@@ -185,7 +195,9 @@ Va_data	 = np.array([])
 #alpha_data  = np.array([])
 #beta_data   = np.array([])
 phi_data	= np.array([])
+phi_c_data  = np.array([])
 theta_data  = np.array([])
+theta_c_data= np.array([])
 psi_data	= np.array([])
 #chi_data	= np.array([])
 #p_data	  = np.array([])
@@ -243,7 +255,9 @@ def init_plot1():
 	#	line_alpha.set_data([], [])
 	#	line_beta.set_data([], [])
 	line_phi.set_data([], [])
+	line_phi_c.set_data([], [])
 	line_theta.set_data([], [])
+	line_theta_c.set_data([], [])
 	line_psi.set_data([], [])
 	line_top_down.set_data([], [])
 	line_waypoints.set_data([],[])
@@ -261,7 +275,7 @@ def animate_plot1(i):
 	"""perform animation step"""
 
 	#	global states, pn_data, pe_data, pd_data, Va_data, alpha_data, beta_data, phi_data, theta_data, time_data
-	global states, pn_data, pe_data, pd_data, Va_data, phi_data, theta_data, psi_data, time_data, waypoint_pn_data, waypoint_pe_data
+	global states, pn_data, pe_data, pd_data, Va_data, phi_data, theta_data, psi_data, time_data, waypoint_pn_data, waypoint_pe_data, phi_c_data, theta_c_data
 	#	global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, fig_plots1, fig_plots2
 	global ax_pn, ax_pe, ax_pd, ax_Va, ax_phi, ax_theta, ax_psi, top_down,fig_plots1
 	#	global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min, axis_xlim
@@ -277,7 +291,9 @@ def animate_plot1(i):
 	#alpha_data  = np.append(alpha_data, states.alpha)
 	#beta_data   = np.append(beta_data, states.beta)
 	phi_data	= np.append(phi_data, states.phi)
+	phi_c_data  = np.append(phi_c_data,states.phi_c)
 	theta_data  = np.append(theta_data, states.theta)
+	theta_c_data= np.append(theta_c_data, states.theta_c)
 	psi_data = np.append(psi_data, states.psi)
 	waypoint_pn_data = np.append(waypoint_pn_data, states.waypoint_pn)
 	waypoint_pe_data = np.append(waypoint_pe_data, states.waypoint_pe)
@@ -407,7 +423,9 @@ def animate_plot1(i):
 #	line_alpha.set_data(time_data,  alpha_data)
 #	line_beta.set_data(time_data,   beta_data )
 	line_phi.set_data(time_data,	phi_data  )
+	line_phi_c.set_data(time_data,   phi_c_data)
 	line_theta.set_data(time_data,  theta_data)
+	line_theta_c.set_data(time_data, theta_c_data)
 	line_psi.set_data(time_data,  psi_data)
 	line_top_down.set_data(pe_data, pn_data)
 	line_waypoints.set_data(waypoint_pe_data,waypoint_pn_data)
