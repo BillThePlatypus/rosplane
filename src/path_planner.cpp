@@ -13,10 +13,10 @@ int main(int argc, char** argv) {
 
     float Va = 30;//11;
     float wps[5*num_waypoints] = {
-				0, -1500, -100, 0, Va,
-				0, -2000, -100, 0, Va,
-				0, -3000, -100, 0, Va,
-				-500, -3500, -100, 0, Va,
+				0, 0, 0, 0, Va,
+				0, 300, -100, 0, Va,
+				-300, 0, -100, 0, Va,
+				0, -300, -100, 0, Va,
                };
 
     for(int i(0);i<num_waypoints;i++)

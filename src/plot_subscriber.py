@@ -37,6 +37,7 @@ class state_subscriber():
 		self.time = 0.
 		self.waypoint_pn = 0. # hold the published way points
 		self.waypoint_pe = 0.
+		self.waypoint_pd = 0.
 		#------------------------------------------------------------
 		rospy.Subscriber("/junker/truth", FW_State, self.callback)
 		rospy.Subscriber("/clock", Clock, self.callback_time)
@@ -68,6 +69,7 @@ class state_subscriber():
 	def callback_waypoints(self,FW_Current_Path):
 		self.waypoint_pn = FW_Current_Path.r[0] #NED Coordinates
 		self.waypoint_pe = FW_Current_Path.r[1]
+		self.waypoint_pd = FW_Current_Path.r[2]
 
 	def callback_attitude(self, FW_Attitde_Commands):
 		self.theta_c = FW_Attitde_Commands.theta_c # commanded values for phi and theta
@@ -155,10 +157,10 @@ line_Va,	= ax_Va.plot([], [])
 line_phi,   = ax_phi.plot([], [])
 line_theta, = ax_theta.plot([], [])
 line_psi,   = ax_psi.plot([], [])
-line_top_down, = top_down.plot([],[])
-line_waypoints, = top_down.plot([],[]) # plot the waypoints
+line_top_down, = top_down.plot([],[],color='c')
+line_waypoints, = top_down.plot([],[],color='g') # plot the waypoints
 line_waypoints.set_marker("o")
-line_waypoints.set_markersize(10)
+line_waypoints.set_markersize(5)
 line_phi_c, = ax_phi.plot([], [])
 line_theta_c, = ax_theta.plot([], [])
 #line_chi,   = ax_chi.plot([], [])
@@ -209,6 +211,10 @@ psi_data	= np.array([])
 time_data   = np.array([])
 waypoint_pn_data = np.array([])
 waypoint_pe_data = np.array([])
+waypoint_pd_data = np.array([])
+waypoint_pn_data = np.append(waypoint_pn_data, 0)
+waypoint_pe_data = np.append(waypoint_pe_data, 0)
+waypoint_pd_data = np.append(waypoint_pd_data, 0)
 
 # the following variables keep track of our axis limits so we can scale them when needed
 pn_max	= 7.0
@@ -275,7 +281,7 @@ def animate_plot1(i):
 	"""perform animation step"""
 
 	#	global states, pn_data, pe_data, pd_data, Va_data, alpha_data, beta_data, phi_data, theta_data, time_data
-	global states, pn_data, pe_data, pd_data, Va_data, phi_data, theta_data, psi_data, time_data, waypoint_pn_data, waypoint_pe_data, phi_c_data, theta_c_data
+	global states, pn_data, pe_data, pd_data, Va_data, phi_data, theta_data, psi_data, time_data, waypoint_pn_data, waypoint_pe_data, waypoint_pd_data,phi_c_data, theta_c_data
 	#	global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, fig_plots1, fig_plots2
 	global ax_pn, ax_pe, ax_pd, ax_Va, ax_phi, ax_theta, ax_psi, top_down,fig_plots1
 	#	global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min, axis_xlim
@@ -295,9 +301,20 @@ def animate_plot1(i):
 	theta_data  = np.append(theta_data, states.theta)
 	theta_c_data= np.append(theta_c_data, states.theta_c)
 	psi_data = np.append(psi_data, states.psi)
+	last_waypoint_pe = waypoint_pe_data[-1]
+	last_waypoint_pn = waypoint_pn_data[-1]
+	last_waypoint_pd = waypoint_pd_data[-1]
 	waypoint_pn_data = np.append(waypoint_pn_data, states.waypoint_pn)
 	waypoint_pe_data = np.append(waypoint_pe_data, states.waypoint_pe)
+	waypoint_pd_data = np.append(waypoint_pd_data, states.waypoint_pd)
 	time_data   = np.append(time_data, states.time)
+
+	# plot the error next to the waypoint when it is reached
+	if((last_waypoint_pn <> waypoint_pn_data[-1] or last_waypoint_pe <> waypoint_pe_data[-1] or last_waypoint_pd <> waypoint_pd_data[-1]) and states.time > 5):
+		pn_error = states.pn - waypoint_pn_data[-1]
+		pe_error = states.pe - waypoint_pe_data[-1]
+		pd_error = states.pd - waypoint_pd_data[-1]
+		top_down.text(states.waypoint_pe+40,states.waypoint_pn-100,"error:\npn:%(1)d\npe:%(2)d\npd:%(3)d" %{"1":pn_error,"2":pe_error,"3":pd_error},fontsize=8)
 
 	# update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
 	need_to_plot = False
