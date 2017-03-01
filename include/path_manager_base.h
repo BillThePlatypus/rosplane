@@ -11,6 +11,9 @@
 #define PATH_MANAGER_BASE_H
 
 #include <ros/ros.h>
+#include "std_msgs/String.h" //---------------------------------------------
+#include <string>//---------------------------------------------
+#include <sstream>//----------------------------------------------
 #include <fcu_common/FW_State.h>
 #include <fcu_common/FW_Current_Path.h>
 #include <fcu_common/FW_Waypoint.h>
@@ -67,6 +70,9 @@ protected:
 
     virtual void manage(const struct params_s &params, const struct input_s &input, struct output_s &output) = 0;
 
+    void debug_message_publish(std::string message); //-------------------
+    int num_times_lt2 = 0;//---------------------------------
+
 private:
 
     ros::NodeHandle nh_;
@@ -74,6 +80,8 @@ private:
     ros::Subscriber _vehicle_state_sub;     /**< vehicle state subscription */
     ros::Subscriber _new_waypoint_sub;      /**< new waypoint subscription */
     ros::Publisher  _current_path_pub;      /**< controller commands publication */
+
+    ros::Publisher _console_output_pub; //-------------------------------------
 
     struct params_s                 params_;
     //    struct {
@@ -86,6 +94,7 @@ private:
     void vehicle_state_callback(const fcu_common::FW_StateConstPtr& msg);
     void new_waypoint_callback(const fcu_common::FW_Waypoint &msg);
     void current_path_publish(struct output_s &output);
+
 };
 } //end namespace
 #endif // PATH_MANAGER_BASE_H

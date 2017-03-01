@@ -53,11 +53,11 @@
   <node name="pathfollower" pkg="ros_plane" type="ros_plane_path_follower">
      <remap from="state" to="/junker/truth"/>
   </node>
-
+<!--
   <node name="chase" pkg="image_view" type="image_view">
     <remap from="image" to="/junker/chase/camera/rgb"/>
   </node>
-
+-->
   <!--<node name="reconfig" pkg="rqt_reconfigure" type="rqt_reconfigure"/> -->
 
   <node name="path_manager" pkg="ros_plane" type="ros_plane_path_manager">
@@ -67,9 +67,10 @@
   <node name="path_planner" pkg="ros_plane" type="ros_plane_path_planner">
   </node>
 
+<!-- STANDARD PLOTS COMMENTED OUT
   <node name="attitude_plotter" pkg="ros_plane" type="plot_subscriber.py">
   </node>
-
+-->
   <!--<node name="current_path_publisher" pkg="rostopic" type="rostopic"
     args="pub /current_path fcu_common/FW_Current_Path 'false' '30.0'  '[0.0, 0.0, -100.0]'  '[1.0, 0.0, 0.0]'  '[0.0, 0.0, -100.0]'  '100.0' '1'"/> -->
 

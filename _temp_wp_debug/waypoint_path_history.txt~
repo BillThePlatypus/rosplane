@@ -1,0 +1,25 @@
+w: [1000.0, 0.0, -100.0]
+chi_d: 0.0
+chi_valid: False
+Va_d: 30.0
+set_current: False
+---
+w: [0.0, -1000.0, -100.0]
+chi_d: 0.0
+chi_valid: False
+Va_d: 30.0
+set_current: False
+---
+w: [-1000.0, 0.0, -100.0]
+chi_d: 0.0
+chi_valid: False
+Va_d: 30.0
+set_current: False
+---
+w: [0.0, 1000.0, -100.0]
+chi_d: 0.0
+chi_valid: False
+Va_d: 30.0
+set_current: False
+---
+

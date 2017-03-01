@@ -1,0 +1,35 @@
+=================================FW_Waypoint====================================
+# New waypoint, input to path manager
+
+# @warning w and set_current always have to be valid; the chi_d is optional.
+float32[3] w		# Waypoint in local NED (m)
+float32 chi_d		# Desired course at this waypoint (rad)
+bool chi_valid		# Desired course valid
+float32 Va_d		# Desired airspeed (m/s)
+bool set_current	# Sets this waypoint to be executed now!
+================================================================================
+# ONLY FOUR OUTPUTS OF /WAYPOINT_PATH ARE PUBLISHED BEFORE NODE DISAPPEARS:
+w: [1000.0, 0.0, -100.0]
+chi_d: 0.0
+chi_valid: False
+Va_d: 30.0
+set_current: False
+---
+w: [0.0, -1000.0, -100.0]
+chi_d: 0.0
+chi_valid: False
+Va_d: 30.0
+set_current: False
+---
+w: [-1000.0, 0.0, -100.0]
+chi_d: 0.0
+chi_valid: False
+Va_d: 30.0
+set_current: False
+---
+w: [0.0, 1000.0, -100.0]
+chi_d: 0.0
+chi_valid: False
+Va_d: 30.0
+set_current: False
+---
