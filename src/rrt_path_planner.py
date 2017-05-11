@@ -2,7 +2,7 @@
 # Python implementation of "path_planner.cpp"
 
 import rospy
-from fcu_common.msg import FW_Waypoint
+from ros_plane.msg import Waypoint
 import math
 import RRT
 import numpy as np
@@ -15,7 +15,7 @@ def publishwaypoints():
 	rospy.init_node('ros_plane_path_planner', anonymous=True)
 
 	# Init Publisher
-	waypointPublisher = rospy.Publisher('/waypoint_path',FW_Waypoint, queue_size=10)
+	waypointPublisher = rospy.Publisher('waypoint_path',Waypoint, queue_size=10)
 
 	# Sleep, (this fixed bug of first waypoint not publishing)
 	d = rospy.Duration(.5)
@@ -86,22 +86,23 @@ def publishwaypoints():
 	num_rrt_wps = len(wps_rrt)/5
 	# Loop through each waypoint
 	for i in range(0,num_rrt_wps):
-	
-		# Make waypoint a FW_Waypoint msg
-		new_waypoint = FW_Waypoint()
-	
+
+		# Make waypoint a Waypoint msg
+		new_waypoint = Waypoint()
+
 		new_waypoint.w[0] = wps_rrt[i*5 + 0]
 		new_waypoint.w[1] = wps_rrt[i*5 + 1]
 		new_waypoint.w[2] = wps_rrt[i*5 + 2]
 		new_waypoint.chi_d = wps_rrt[i*5 + 3]
-	
+
 		new_waypoint.chi_valid = True # True
 		new_waypoint.set_current = False
 		new_waypoint.Va_d = wps_rrt[i*5 + 4]
-	
+
 		# Publish the Waypoint
 		waypointPublisher.publish(new_waypoint)
-	
+		rospy.logwarn('waypoint published')
+
 		# Sleep
 		d = rospy.Duration(0.5)
 		rospy.sleep(d)

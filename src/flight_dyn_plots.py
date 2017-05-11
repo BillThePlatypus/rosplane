@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import rospy
-from fcu_common.msg import FW_State, FW_Current_Path, FW_Waypoint, FW_Dubin
+from fcu_common.msg import State
+from ros_plane.msg import Dubin, Waypoint, Current_Path
 from std_msgs.msg import Float32
 
 import numpy as np
@@ -36,20 +37,20 @@ class flight_plots(): # will only extract x,y data for plotting
 		self.rho = 10.0
 		self.lam = 0
 
-		self.dubin = FW_Dubin()
+		self.dubin = Dubin()
 		self.dubin_valid = False
 
 		self.new_error = False
 		self.error = 0.0
 		#------------------------------------------------------------
-		
+
 		# ROS Subscribers
-		rospy.Subscriber("/junker/truth", FW_State, self.callback)
-		rospy.Subscriber("current_path", FW_Current_Path, self.path_callback)
-		rospy.Subscriber("current_waypoint", FW_Waypoint, self.wp_callback)
-		rospy.Subscriber("dubin_params", FW_Dubin, self.dubin_callback)
+		rospy.Subscriber("/junker/truth", State, self.callback)
+		rospy.Subscriber("current_path", Current_Path, self.path_callback)
+		rospy.Subscriber("current_waypoint", Waypoint, self.wp_callback)
+		rospy.Subscriber("dubin_params", Dubin, self.dubin_callback)
 		rospy.Subscriber("waypoint_error", Float32, self.error_callback)
-		
+
 		# pygame init
 		pygame.init()
 		self.screen=pygame.display.set_mode([self.x_size, self.y_size])
@@ -134,7 +135,7 @@ class flight_plots(): # will only extract x,y data for plotting
 		sq_e2b = (self.x_size/2)*((square[3]-buf)/self.east_max) + self.x_size/2
 
 		pointlist4 = [[sq_e1b,sq_n1b],[sq_e1b,sq_n2b],[sq_e2b,sq_n2b],[sq_e2b,sq_n1b]]
-		
+
 		return [pointlist1,pointlist2, pointlist3, pointlist4]
 
 	def animate(self):
@@ -144,7 +145,7 @@ class flight_plots(): # will only extract x,y data for plotting
 
 		# Position
 		pygame.draw.circle(self.screen, self.blue, (int(self.pe),int(self.pn)),5)
-		
+
 		# Current Waypoint
 		pygame.draw.circle(self.screen, self.green, (int(self.wp_e),int(self.wp_n)),5)
 
@@ -175,13 +176,13 @@ class flight_plots(): # will only extract x,y data for plotting
 			ce_e = int((self.x_size/2)*(self.dubin.ce[1]/self.east_max) + self.x_size/2)
 			rad = int(0.5*self.x_size*(self.dubin.R/self.north_max))
 			pygame.draw.circle(self.screen, self.bg, (int(ce_e),int(ce_n)),rad, 1)
-		
+
 		# Current Path
 		if self.path_flag == False and (self.rho != 0):
 			# Circle Path
 			center_n = int(-(self.y_size/2)*(self.c[0]/self.north_max) + self.y_size/2)
 			center_e = int((self.x_size/2)*(self.c[1]/self.east_max) + self.x_size/2)
-			center = (center_e,center_n)			
+			center = (center_e,center_n)
 			rad = int(0.5*self.x_size*(self.rho/self.north_max))
 			pygame.draw.circle(self.screen, self.red, center, rad, 1)
 		if self.path_flag == True:

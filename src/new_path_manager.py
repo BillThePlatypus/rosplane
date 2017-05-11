@@ -4,7 +4,8 @@
 # need to make polymorphism
 
 import rospy
-from fcu_common.msg import FW_State, FW_Current_Path, FW_Waypoint, FW_Dubin
+from fcu_common.msg import State
+from ros_plane.msg import Waypoint, Current_Path, Dubin
 from sensor_msgs.msg import Imu, FluidPressure
 from std_msgs.msg import Float32, Float32MultiArray
 from math import *
@@ -12,7 +13,7 @@ import numpy as np
 #import Eigen
 #from ros_plane import ControllerConfig
 
-# These were global constants in the cpp files, can change to np.pi and np.pi/2 
+# These were global constants in the cpp files, can change to np.pi and np.pi/2
 M_PI_F = 3.14159265358979323846
 M_PI_2_F = 1.57079632679489661923
 
@@ -29,7 +30,7 @@ def crossed_plane(plane_point, normal, loc):
 	if dot_prod > 0:
 		crossed = True
 	return crossed
-	
+
 def mod2pi(phi):
 	mod = phi%(2 * np.pi)
 	return mod
@@ -45,20 +46,20 @@ class path_manager_base:
 		self.params.R_min = rospy.get_param('R_min', 200.0)
 
 		# inititlialize subscribers
-		self._vehicle_state_sub = rospy.Subscriber('/junker/truth', FW_State, self.vehicle_state_callback)
-		self._new_waypoint_sub = rospy.Subscriber('waypoint_path', FW_Waypoint, self.new_waypoint_callback)
+		self._vehicle_state_sub = rospy.Subscriber('truth', State, self.vehicle_state_callback)
+		self._new_waypoint_sub = rospy.Subscriber('waypoint_path', Waypoint, self.new_waypoint_callback)
 
 		# Init Publishers
-		self._current_path_pub = rospy.Publisher('current_path', FW_Current_Path, queue_size=10)
-		self._current_wp_pub = rospy.Publisher('current_waypoint', FW_Waypoint, queue_size=10)
-		self._current_dub_pub = rospy.Publisher('dubin_params', FW_Dubin, queue_size=10)
+		self._current_path_pub = rospy.Publisher('current_path', Current_Path, queue_size=10)
+		self._current_wp_pub = rospy.Publisher('current_waypoint', Waypoint, queue_size=10)
+		self._current_dub_pub = rospy.Publisher('dubin_params', Dubin, queue_size=10)
 		self._wp_error_pub = rospy.Publisher('waypoint_error', Float32, queue_size=1)
 
-		self.index_a = 1 #waypoint 0 should be initial position, waypoint 1 where you want to start flying to	
+		self.index_a = 1 #waypoint 0 should be initial position, waypoint 1 where you want to start flying to
 
 		# Class members
 		self._num_waypoints = 0
-		self._vehicle_state = FW_State()
+		self._vehicle_state = State()
 
 		self.i = 0
 		self._dubins_mark = self.dubin_state()
@@ -67,7 +68,7 @@ class path_manager_base:
 		self.start_up = True
 		# Member objects
 		# self._dubinspath = self.dubinspath_s()
-		self._dubinspath = FW_Dubin()
+		self._dubinspath = Dubin()
 
 		self._waypoints = []
 
@@ -86,7 +87,7 @@ class path_manager_base:
 		def __repr__(self):
 			return str(self)
 	# I had problems with an array of instances of waypoint_s because of the w array, so here's my temporary fix
-	class waypoint_temp: 
+	class waypoint_temp:
 		w0 = 0.0
 		w1 = 0.0
 		w2 = 0.0
@@ -116,7 +117,7 @@ class path_manager_base:
 	class params_s:
 		R_min = 0.0 # Minimum turning radius
 
-	class dubin_state: 
+	class dubin_state:
 		First = 0
 		Before_H1 = 1
 		Before_H1_wrong_side = 2
@@ -179,7 +180,7 @@ class path_manager_base:
 		self._waypoints[self._num_waypoints].Va_d      = 35
 		self._num_waypoints+=1
 
-		print('Waypoints inititlialized: ')
+		print('Waypoints initialized: ')
 		print 'Number of Waypoints: ' + str(len(self._waypoints))
 
 	def vehicle_state_callback(self, msg):
@@ -199,7 +200,7 @@ class path_manager_base:
 			self.i = 0
 
 	def new_waypoint_callback(self, msg):
-		# print 'New Waypoint Callback'
+		rospy.logwarn('New Waypoint Callback')
 		# add new waypoint to self._waypoint array or waypoints
 		if msg.set_current == False:
 			new_wp = self.waypoint_temp()
@@ -239,7 +240,7 @@ class path_manager_base:
 
 	def current_path_publisher(self, output):
 		# print 'Current Path Publisher'
-		current_path = FW_Current_Path()
+		current_path = Current_Path()
 		# set current_path to output from manager
 		current_path.flag = output.flag
 		current_path.Va_d = output.Va_d
@@ -253,7 +254,7 @@ class path_manager_base:
 		self._current_path_pub.publish(current_path) # publish
 
 		if self._num_waypoints >=3:
-			current_wp = FW_Waypoint()
+			current_wp = Waypoint()
 			current_wp.w[0] = self._waypoints[self.index_a].w0
 			current_wp.w[1] = self._waypoints[self.index_a].w1
 			current_wp.w[2] = self._waypoints[self.index_a].w2
@@ -279,7 +280,7 @@ class path_manager_base:
 	# 	w2 = np.array([0.0, 0.0, 0.0]) 	# vector defining half plane H2
 	# 	w3 = np.array([0.0, 0.0, 0.0])	# vector defining half plane H3
 	# 	q3 = np.array([0.0, 0.0, 0.0])	# unit vector defining direction of half plane H3
-	
+
 
 	# functions
 	def manage(self, params, inpt, output):
@@ -301,7 +302,7 @@ class path_manager_base:
 			rospy.logwarn('ERROR: less than 3 waypoints!!!')
 		else:
 			# print self.index_a
-			if (self._waypoints[self.index_a].chi_valid) and (self.index_a > 1): 
+			if (self._waypoints[self.index_a].chi_valid) and (self.index_a > 1):
 				# print 'Manage -- Dubins'
 				output = self.manage_dubins(params, inpt, output)
 				if self.start_up:
