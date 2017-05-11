@@ -36,7 +36,7 @@ def publishwaypoints():
 	num_waypoints = len(wps)/5
 
 	# Params
-	R_min = 150
+	R_min = 200
 
 	# print(wpp_start[0:3])
 	map_width = 3000
