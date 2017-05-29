@@ -5,7 +5,7 @@ import rospy
 from ros_plane.msg import Waypoint
 import math
 
-num_waypoints = 6
+num_waypoints = 5
 
 def publishwaypoints():
 
@@ -13,21 +13,22 @@ def publishwaypoints():
 	rospy.init_node('ros_plane_path_planner', anonymous=True)
 
 	# Init Publisher
-	waypointPublisher = rospy.Publisher('/waypoint_path',Waypoint, queue_size=10)
+	waypointPublisher = rospy.Publisher('waypoint_path',Waypoint, queue_size=10)
 
 	# Sleep, (this fixed bug of first waypoint not publishing)
 	d = rospy.Duration(.5)
 	rospy.sleep(d)
 
 	# Set waypoints
-	Va = 30.0#8.5 # 11.0
+	Va = 15.0#8.5 # 11.0
 	wps =  [
-				0, 0, -75, 0.0, Va,
-				750, 0, -75, 0*math.pi/180.0, Va,
-				0, 1000, -75, -math.pi, Va,
-				-1000, 0, -75, -math.pi/2.0, Va,
-				0, -1000, -75, 0.0, Va,
-				1000, 0, -75, math.pi/2, Va]
+				0.0, 0.0, -60, 0.0, Va,
+				150.0, 5.7077, -60, 0.0, Va,
+				-20, -100.71729, -60, -math.pi, Va,
+				70.5817, 30.4049, -60, 1.0, Va,
+				170.8173, -100.1882, -60, -1.5, Va
+                #.562, -18.7037, -60, math.pi, Va
+				]
                 # -10, -10, -30, -45, Va,
                 # -10, -125, -30, -135*math.pi/180, Va,
                 # -125, -10, -30, 45*math.pi/180, Va,
