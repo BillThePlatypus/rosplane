@@ -131,13 +131,23 @@ float controller_example::course_hold(float chi_c, float chi, float phi_ff, floa
   {
     error = error - (float (2.0f*M_PI));
   }
+
+  while (chi < (float (-M_PI)))
+  {
+    chi = chi + (float (2.0f*M_PI));
+  }
+  while (chi > (float (M_PI)))
+  {
+    chi = chi - (float (2.0f*M_PI));
+  }
   //float error = fmod(chi_c - chi,(float (2.0*M_PI))); // mod 2 Pi
 
   c_integrator_ = c_integrator_ + (Ts/2.0)*(error + c_error_);
 
-  float up = params.c_kp*error;
+  // float up = params.c_kp*error;
+  float up = -params.c_kp*chi;          // Dr. McLain suggested to put kP on the state, and kI on the error.
   float ui = params.c_ki*c_integrator_;
-  float ud = params.c_kd*r;
+  float ud = params.c_kd*r;             // kd should be put to 0, or about 0.
 
   float phi_c = sat(up + ui + ud + phi_ff, 45.0*3.14/180.0, -45.0*3.14/180.0);
   if (fabs(params.c_ki) >= 0.00001)
