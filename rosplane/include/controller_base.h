@@ -131,9 +131,11 @@ namespace rosplane
             double climb_angle_deg;
         };
 
-        virtual void control(const struct params_s &params, const struct input_s &input, struct output_s &output) = 0;
-        virtual void tune(const struct params_s &params, const struct input_s &input, const struct tuning_input_s &tuning_input,
-             struct output_s &output) = 0;
+        virtual void control(const struct params_s &params, const struct input_s &input,
+                             struct output_s &output) = 0;
+        virtual void tune(const struct params_s &params, const struct input_s &input,
+                          const struct tuning_input_s &tuning_input,
+                          struct output_s &output) = 0;
 
     private:
         ros::NodeHandle nh_;

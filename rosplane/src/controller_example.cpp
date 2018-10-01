@@ -146,12 +146,12 @@ namespace rosplane
         }
     }
 
-    void
-    controller_example::tune(const params_s &params, const input_s &input, const struct tuning_input_s &tuning_input,
-                             output_s &output)
+    void controller_example::tune(const struct params_s &params, const struct input_s &input,
+                                  const struct tuning_input_s &tuning_input,
+                                  struct output_s &output)
     {
         output.delta_r = 0.0f;
-        output.current_zone = alt_zones::AltitudeHold;
+        output.current_zone = alt_zones::ALTITUDE_HOLD;
         switch (tuning_input.mode)
         {
             case tuning_modes::Roll:
@@ -181,8 +181,7 @@ namespace rosplane
         }
     }
 
-    float
-    controller_example::course_hold(float chi_c, float chi, float phi_ff, float r, const params_s &params, float Ts)
+    float controller_example::course_hold(float chi_c, float chi, float phi_ff, float r, const params_s &params, float Ts)
     {
         float error = chi_c - chi; // mod by 2 PI
 

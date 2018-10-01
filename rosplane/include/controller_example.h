@@ -13,6 +13,9 @@ public:
 private:
   virtual void control(const struct params_s &params, const struct input_s &input, struct output_s &output);
   alt_zones current_zone;
+  virtual void tune(const struct params_s &params, const struct input_s &input,
+                      const struct tuning_input_s &tuning_input,
+                      struct output_s &output);
   float groundD_;
 
   float course_hold(float chi_c, float chi, float phi_ff, float r, const struct params_s &params, float Ts);
