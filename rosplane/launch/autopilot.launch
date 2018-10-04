@@ -1,77 +1,81 @@
 <!--This launch file controls the plane to be level. -->
 <launch>
- <arg name="mav_name"  default="MTD"/>
- <!-- Autonomy level can be 0,1,2,3
-     0: Controller
-     1: Path Follower
-     2: Path Manager
-     3: Path Planner -->
- <arg name="autonomy_level" default="2" />
- <rosparam command="load" file="$(find rosplane)/param/MTD.yaml" ns="controller"/>
- <rosparam subst_value="true">
- uINS: {
-    INS_rpy: [0, 0, -1.570796]
- }
- </rosparam>
- <node name="rosflight_io"  pkg="rosflight"  type="rosflight_io" output="screen">
-   <param name="port" value="/dev/ttyACM0"/>
- </node>
- <node name="uINS" pkg="inertial_sense" type="inertial_sense_node" output="screen">
-   <param name="~port" value="/dev/ttyUSB0"/>
-   <!-- WEBSTER FIELD -->
-   <!--
-    <param name="~lat_ref" value="38.144692"/>
-    <param name="~lon_ref" value="-76.428007"/>
-    <param name="~h_ref" value="0.0"/>
-   -->
+	<arg name="mav_name"	default="MTD"/>
+	 <!-- Autonomy level can be 0,1,2,3
+			 0: Controller
+			 1: Path Follower
+			 2: Path Manager
+			 3: Path Planner -->
+	<arg name="autonomy_level" default="2" />
 
-   <!-- ELBERTA, UT -->
-<!--
-    <param name="~lat_ref" value="39.969582"/>
-    <param name="~lon_ref" value="-111.96711"/>
-    <param name="~h_ref" value="1415.0"/> -->
+	<rosparam command="load" file="$(find rosplane)/param/MTD.yaml" ns="controller"/>
+	<rosparam subst_value="true">
+		uINS: {
+			INS_rpy: [0, 0, -1.570796]
+		}
+	</rosparam>
 
+	<node name="rosflight_io" pkg="rosflight" type="rosflight_io" output="screen">
+		<param name="port" value="/dev/ttyACM0"/>
+	</node>
 
-   <!-- ROCK CANYON PARK -->
-   <!--
-    <param name="~lat_ref" value="40.2679779"/>
-    <param name="~lon_ref" value="-111.6344569"/>
-    <param name="~h_ref" value="1450.0"/>
-   -->
+	<node name="uINS" pkg="inertial_sense" type="inertial_sense_node" output="screen">
+		<param name="~port" value="/dev/ttyUSB0"/>
+			<!-- WEBSTER FIELD -->
+			<!--
+				<param name="~lat_ref" value="38.144692"/>
+				<param name="~lon_ref" value="-76.428007"/>
+				<param name="~h_ref" value="0.0"/>
+			 -->
 
-   <!-- Springville by Mitsubishi Dealership -->
-   <param name="~lat_ref" value="40.174308"/> <!-- 40.2679779 -->
-   <param name="~lon_ref" value="-111.654166"/> <!-- -111.6344569 -->
-   <param name="~h_ref" value="1369.000"/> <!--1470.0 -->
- </node>
+			<!-- ELBERTA, UT -->
+			<!--
+				<param name="~lat_ref" value="39.969582"/>
+				<param name="~lon_ref" value="-111.96711"/>
+				<param name="~h_ref" value="1415.0"/> -->
 
 
- <node name="estimator" pkg="rosplane" type="rosplane_estimator" output="screen">
-   <param name="~use_inertial_sense" type="bool" value="true"/>
- </node>
+			<!-- ROCK CANYON PARK -->
+			<!--
+				<param name="~lat_ref" value="40.2679779"/>
+				<param name="~lon_ref" value="-111.6344569"/>
+				<param name="~h_ref" value="1450.0"/>
+			 -->
 
- <!--Path Follower-->
- <node name="path_follower" pkg="rosplane" type="rosplane_path_follower"
-        if="$(eval autonomy_level >= 1)"/>
+			<!-- Springville by Mitsubishi Dealership -->
+		<param name="~lat_ref" value="40.174308"/> <!-- 40.2679779 -->
+		<param name="~lon_ref" value="-111.654166"/> <!-- -111.6344569 -->
+		<param name="~h_ref" value="1369.000"/> <!--1470.0 -->
+	</node>
 
- <!--Path Manager-->
- <node name="path_manager" pkg="rosplane" type="rosplane_path_manager"
-        if="$(eval autonomy_level >= 2)"/>
+	<node name="estimator" pkg="rosplane" type="rosplane_estimator" output="screen">
+		<param name="~use_inertial_sense" type="bool" value="true"/>
+	</node>
 
- <!--Path Planner-->
- <node name="pathplanner" pkg="rosplane" type="rosplane_path_planner" output="screen"
-        if="$(eval autonomy_level >= 3)"/>
+	<!--Path Follower-->
+	<node name="path_follower" pkg="rosplane" type="rosplane_path_follower"
+		if="$(eval autonomy_level >= 1)"/>
 
- <node name="controller" pkg="rosplane" type="rosplane_controller" output="screen">
-   <!--<param name="PWM_RAD_E" value="2.8"/>
-   <param name="PWM_RAD_A" value="-1.6"/>
-   <param name="PWM_RAD_R" value="1.8"/>
-   <param name="ALT_TOZ" value="20"/>
-   <param name="ALT_HZ" value="40"/>
-   <param name="MAX_T" value="0.70"/>-->
- </node>
+	<!--Path Manager-->
+	<node name="path_manager" pkg="rosplane" type="rosplane_path_manager"
+		if="$(eval autonomy_level >= 2)"/>
 
- <node pkg="rosservice" type="rosservice" name="calibration_of_imu" args="call --wait /calibrate_imu"/>
- <node pkg="rosservice" type="rosservice" name="calibration_of_baro" args="call --wait /calibrate_baro"/>
- <node pkg="rosservice" type="rosservice" name="calibration_of_airspeed" args="call --wait /calibrate_airspeed"/>
+	<!--Path Planner-->
+	<node name="pathplanner" pkg="rosplane" type="rosplane_path_planner" output="screen"
+		if="$(eval autonomy_level >= 3)"/>
+
+	<node name="controller" pkg="rosplane" type="rosplane_controller" output="screen">
+		<!--<param name="PWM_RAD_E" value="2.8"/>
+		<param name="PWM_RAD_A" value="-1.6"/>
+		<param name="PWM_RAD_R" value="1.8"/>
+		<param name="ALT_TOZ" value="20"/>
+		<param name="ALT_HZ" value="40"/>
+		<param name="MAX_T" value="0.70"/>-->
+	</node>
+
+	<node pkg="rosservice" type="rosservice" name="calibration_of_imu" args="call --wait /calibrate_imu"/>
+	<node pkg="rosservice" type="rosservice" name="calibration_of_baro" args="call --wait /calibrate_baro"/>
+	<node pkg="rosservice" type="rosservice" name="calibration_of_airspeed" args="call --wait /calibrate_airspeed"/>
+
+	<node pkg="rosbag" type="record" name="rosbag_record"	args="record -a -o rosplane_tuning" />
 </launch>
