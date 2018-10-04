@@ -53,9 +53,9 @@
     </node>
 
     <!-- <node name="pathplanner" pkg="rosplane" type="rosplane_path_planner" output="screen"/>  -->
-    <node name="bomber" pkg="rosplane" type="bomb_dropper" output="screen">
+    <!-- <node name="bomber" pkg="rosplane" type="bomb_dropper" output="screen">
       <param name="call_gpio" value="false"/>
-    </node>
+    </node> -->
 
     <node name="dynamic_reconfigure_gui" pkg="rqt_reconfigure" type="rqt_reconfigure"/>
     <!-- <node name="position_plotter" pkg="rosplane" type="position_plotter.py" output="screen"> -->
