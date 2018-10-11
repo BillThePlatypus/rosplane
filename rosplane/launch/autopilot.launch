@@ -6,12 +6,12 @@
 			 1: Path Follower
 			 2: Path Manager
 			 3: Path Planner -->
-	<arg name="autonomy_level" default="2" />
+	<arg name="autonomy_level" default="0" />
 
 	<rosparam command="load" file="$(find rosplane)/param/MTD.yaml" ns="controller"/>
 	<rosparam subst_value="true">
-		uINS: {
-			INS_rpy: [0, 0, -1.570796]
+            uINS: {
+            INS_rpy: [0, 0, -1.570796]
 		}
 	</rosparam>
 
