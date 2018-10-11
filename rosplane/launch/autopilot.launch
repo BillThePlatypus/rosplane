@@ -43,9 +43,9 @@
 			 -->
 
 			<!-- Springville by Mitsubishi Dealership -->
-		<param name="~lat_ref" value="40.174308"/> <!-- 40.2679779 -->
-		<param name="~lon_ref" value="-111.654166"/> <!-- -111.6344569 -->
-		<param name="~h_ref" value="1369.000"/> <!--1470.0 -->
+		<param name="~lat_ref" value="40.174308"/>
+		<param name="~lon_ref" value="-111.654166"/>
+		<param name="~h_ref" value="1369.000"/>
 	</node>
 
 	<node name="estimator" pkg="rosplane" type="rosplane_estimator" output="screen">
