@@ -1,3 +1,4 @@
+#include <numeric>
 #include "estimator_base.h"
 #include "estimator_example.h"
 
@@ -13,9 +14,10 @@ estimator_base::estimator_base():
   calibration_sum_   = 0.0;
   avg_this_many_     = 30;
   counted_this_many_ = 0;
-  bool use_inertial_sense;
   std::string inertial_sense_topic;
+  std::string inertial_sense_lla_ref_topic;
   nh_private_.param<std::string>("inertial_sense_topic", inertial_sense_topic, "ins");
+  nh_private_.param<std::string>("inertial_sense_lla_ref_topic", inertial_sense_lla_ref_topic, "lla_ref");
   nh_private_.param<std::string>("gps_topic", gps_topic_, "gps");
   nh_private_.param<std::string>("imu_topic", imu_topic_, "imu/data");
   nh_private_.param<std::string>("baro_topic", baro_topic_, "baro");
@@ -31,12 +33,13 @@ estimator_base::estimator_base():
   nh_private_.param<double>("sigma_e_gps", params_.sigma_e_gps, 0.21);
   nh_private_.param<double>("sigma_Vg_gps", params_.sigma_Vg_gps, 0.0500);
   nh_private_.param<double>("sigma_couse_gps", params_.sigma_course_gps, 0.0045);
-  nh_private_.param<bool>("use_inertial_sense", use_inertial_sense, false);
+  nh_private_.param<bool>("use_inertial_sense", use_inertial_sense_, false);
 
-  if (use_inertial_sense)
+  if (use_inertial_sense_)
   {
     inertial_sense_sub_ = nh_.subscribe(inertial_sense_topic, 1, &estimator_base::inertialSenseCallback, this);
     update_timer_ = nh_.createTimer(ros::Duration(1.0/update_rate_), &estimator_base::updateAirspeed, this);
+    inertial_sense_lla_ref_sub_ = nh_.subscribe(inertial_sense_lla_ref_topic, 1, &estimator_base::inertialSenseLLARefCallback, this);
     ROS_INFO("Using InertialSense.");
   }
   else
@@ -75,12 +78,9 @@ void estimator_base::inertialSenseCallback(const nav_msgs::Odometry &msg_in)
   msg.position[0]     = msg_in.pose.pose.position.x;
   msg.position[1]     = msg_in.pose.pose.position.y;
   msg.position[2]     = msg_in.pose.pose.position.z + height_offset_;
-  if (gps_init_)
-  {
-    msg.initial_lat   = init_lat_;
-    msg.initial_lon   = init_lon_;
-    msg.initial_alt   = init_alt_;
-  }
+  msg.initial_lat   = init_lat_;
+  msg.initial_lon   = init_lon_;
+  msg.initial_alt   = init_alt_;
 
   // Convert quaterion to roll pitch and yaw
   float e0       = msg_in.pose.pose.orientation.w;
@@ -134,6 +134,13 @@ void estimator_base::inertialSenseCallback(const nav_msgs::Odometry &msg_in)
   msg.chi_deg   -= (msg.chi_deg > 180 ? 360 : 0);
 
   vehicle_state_pub_.publish(msg);
+}
+void estimator_base::inertialSenseLLARefCallback(const geometry_msgs::Vector3 &msg)
+{
+  ROS_INFO("LLA reference updated");
+  init_lat_ = msg.x;
+  init_lon_ = msg.y;
+  init_alt_ = msg.z;
 }
 void estimator_base::updateAirspeed(const ros::TimerEvent &)
 {

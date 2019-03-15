@@ -11,6 +11,8 @@
 
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Vector3.h>
 #include <rosplane_msgs/State.h>
 #include <rosflight_msgs/GPS.h>
 #include <sensor_msgs/Imu.h>
@@ -98,6 +100,7 @@ private:
   ros::Subscriber airspeed_sub_;
   ros::Subscriber status_sub_;
   ros::Subscriber inertial_sense_sub_;
+  ros::Subscriber inertial_sense_lla_ref_sub_;
 
   void update(const ros::TimerEvent &);
   void gpsCallback(const rosflight_msgs::GPS &msg);
@@ -106,6 +109,7 @@ private:
   void airspeedCallback(const rosflight_msgs::Airspeed &msg);
   void statusCallback(const rosflight_msgs::Status &msg);
   void inertialSenseCallback(const nav_msgs::Odometry &msg_in);
+  void inertialSenseLLARefCallback(const geometry_msgs::Vector3 &msg_in);
   void updateAirspeed(const ros::TimerEvent &);
 	void filterAirspeed(float &Va);
 
@@ -127,6 +131,7 @@ private:
 	float Va_history_[FILTER_LENGTH];
   bool gps_new_;
   bool gps_init_;
+  bool use_inertial_sense_;
   double init_lat_;       /**< Initial latitude in degrees */
   double init_lon_;       /**< Initial longitude in degrees */
   float init_alt_;        /**< Initial altitude in meters above MSL  */
